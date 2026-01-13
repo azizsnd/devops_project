@@ -21,6 +21,7 @@ collectDefaultMetrics();
 
 // --- In-Memory DB ---
 const students = [];
+let studentIdCounter = 1;
 
 // --- Endpoints ---
 
@@ -42,8 +43,12 @@ app.get('/students', (req, res) => {
 app.post('/students', (req, res) => {
   const student = req.body;
 
-  // Adding ID
-  student.id = students.length + 1;
+  if (!student.name || !student.email) {
+    logger.warn('Validation failed: Missing name or email');
+    return res.status(400).json({ error: 'Name and email are required' });
+  }
+
+  student.id = studentIdCounter++;
   students.push(student);
 
   logger.info(`Student created: ${JSON.stringify(student)}`);
