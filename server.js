@@ -38,14 +38,9 @@ app.get('/students', (req, res) => {
   res.json(students);
 });
 
+
 app.post('/students', (req, res) => {
   const student = req.body;
-
-  // Validation
-  if (!student.name || !student.email) {
-    logger.warn('Validation failed: Missing name or email');
-    return res.status(400).json({ error: 'Name and email are required' });
-  }
 
   // Adding ID
   student.id = students.length + 1;
