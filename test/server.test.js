@@ -11,7 +11,7 @@ describe('Student API', () => {
     it('POST /students should require name', async () => {
         const res = await request(app)
             .post('/students')
-            .send({ email: 'test@test.com' }); // Missing name
+            .send({ email: 'test@test.com' });
         expect(res.statusCode).toEqual(400);
     });
 });
