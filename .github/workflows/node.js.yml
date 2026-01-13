@@ -48,6 +48,7 @@ jobs:
       with:
         target: 'http://localhost:3000/health'
         fail_action: false
+        allow_issue_writing: false # Fix permission error
 
     - name: Stop Test Container
       run: docker rm -f test-container
