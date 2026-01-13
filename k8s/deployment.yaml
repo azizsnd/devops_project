@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: student-registry
+  labels:
+    app: student-registry
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: student-registry
+  template:
+    metadata:
+      labels:
+        app: student-registry
+    spec:
+      containers:
+      - name: student-registry
+        image: student-registry:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 3000
+        # Best Practice: Define Resources
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "250m"
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        # Best Practice: Liveness & Readiness Probes
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 10
