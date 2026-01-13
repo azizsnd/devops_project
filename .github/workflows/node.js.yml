@@ -29,6 +29,29 @@ jobs:
     - name: Run Tests
       run: npm test
 
+    # --- SECURITY: SAST ---
+    - name: Run SAST (Dependency Check)
+      run: npm audit --audit-level=high || true # Show vulnerabilities but don't fail pipeline for demo
+
+    # --- SECURITY: DAST ---
+    - name: Build Local Image for DAST
+      run: docker build -t local-test-image .
+
+    - name: Run Container for DAST
+      run: |
+        docker run -d -p 3000:3000 --name test-container local-test-image
+        sleep 5 # Wait for server to start
+
+    - name: Run DAST (OWASP ZAP)
+      uses: zaproxy/action-baseline@v2
+      with:
+        target: 'http://localhost:3000/health' # Scan the running local container
+        # fail_action: false # Don't block build on alerts for now
+
+    - name: Stop Test Container
+      run: docker rm -f test-container
+
+    # --- PUBLISH ---
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
 
