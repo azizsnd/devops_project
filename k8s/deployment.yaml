@@ -20,7 +20,6 @@ spec:
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 3000
-        # Best Practice: Define Resources
         resources:
           requests:
             memory: "64Mi"
@@ -28,7 +27,6 @@ spec:
           limits:
             memory: "128Mi"
             cpu: "500m"
-        # Best Practice: Liveness & Readiness Probes
         livenessProbe:
           httpGet:
             path: /health

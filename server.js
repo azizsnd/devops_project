@@ -5,7 +5,6 @@ const winston = require('winston');
 const app = express();
 app.use(express.json());
 
-// --- Observability (Logging) ---
 const logger = winston.createLogger({
   level: 'info',
   format: winston.format.json(),
@@ -15,15 +14,12 @@ const logger = winston.createLogger({
   ],
 });
 
-// --- Observability (Metrics) ---
 const collectDefaultMetrics = promClient.collectDefaultMetrics;
 collectDefaultMetrics();
 
-// --- In-Memory DB ---
 const students = [];
 let studentIdCounter = 1;
 
-// --- Endpoints ---
 
 app.get('/health', (req, res) => {
   res.json({ status: 'healthy' });
@@ -56,8 +52,11 @@ app.post('/students', (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  logger.info(`Server running on port ${PORT}`);
-});
+
+if (require.main === module) {
+  app.listen(PORT, () => {
+    logger.info(`Server running on port ${PORT}`);
+  });
+}
 
 module.exports = app;
