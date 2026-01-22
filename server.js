@@ -19,6 +19,7 @@ collectDefaultMetrics();
 
 const students = [];
 let studentIdCounter = 1;
+let studentsCache = null;
 
 
 app.get('/health', (req, res) => {
@@ -32,7 +33,15 @@ app.get('/metrics', async (req, res) => {
 
 app.get('/students', (req, res) => {
   logger.info('Fetching students');
-  res.json(students);
+  // Optimization: Serve cached JSON string to avoid expensive JSON.stringify() on every request
+  if (studentsCache) {
+    res.set('Content-Type', 'application/json');
+    return res.send(studentsCache);
+  }
+  const json = JSON.stringify(students);
+  studentsCache = json;
+  res.set('Content-Type', 'application/json');
+  res.send(json);
 });
 
 
@@ -46,6 +55,7 @@ app.post('/students', (req, res) => {
 
   student.id = studentIdCounter++;
   students.push(student);
+  studentsCache = null; // Invalidate cache when data changes
 
   logger.info(`Student created: ${JSON.stringify(student)}`);
   res.status(201).json(student);
