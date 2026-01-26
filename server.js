@@ -19,6 +19,8 @@ collectDefaultMetrics();
 
 const students = [];
 let studentIdCounter = 1;
+// Cache for serialized students list to improve GET performance
+let studentsCache = null;
 
 
 app.get('/health', (req, res) => {
@@ -32,7 +34,16 @@ app.get('/metrics', async (req, res) => {
 
 app.get('/students', (req, res) => {
   logger.info('Fetching students');
-  res.json(students);
+
+  if (studentsCache) {
+    res.set('Content-Type', 'application/json');
+    return res.send(studentsCache);
+  }
+
+  // Cache miss: serialize and store
+  studentsCache = JSON.stringify(students);
+  res.set('Content-Type', 'application/json');
+  res.send(studentsCache);
 });
 
 
@@ -46,6 +57,9 @@ app.post('/students', (req, res) => {
 
   student.id = studentIdCounter++;
   students.push(student);
+
+  // Invalidate cache on write
+  studentsCache = null;
 
   logger.info(`Student created: ${JSON.stringify(student)}`);
   res.status(201).json(student);
