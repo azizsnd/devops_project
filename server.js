@@ -18,6 +18,9 @@ const collectDefaultMetrics = promClient.collectDefaultMetrics;
 collectDefaultMetrics();
 
 const students = [];
+// Optimization: Cache the serialized JSON to avoid O(N) serialization on every read.
+// This shifts cost to writes (POST), making the read-heavy GET endpoint O(1) in CPU.
+let studentsCache = '[]';
 let studentIdCounter = 1;
 
 
@@ -32,7 +35,8 @@ app.get('/metrics', async (req, res) => {
 
 app.get('/students', (req, res) => {
   logger.info('Fetching students');
-  res.json(students);
+  res.header('Content-Type', 'application/json');
+  res.send(studentsCache);
 });
 
 
@@ -46,6 +50,8 @@ app.post('/students', (req, res) => {
 
   student.id = studentIdCounter++;
   students.push(student);
+  // Invalidate and rebuild cache on write
+  studentsCache = JSON.stringify(students);
 
   logger.info(`Student created: ${JSON.stringify(student)}`);
   res.status(201).json(student);
