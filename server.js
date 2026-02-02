@@ -18,6 +18,7 @@ const collectDefaultMetrics = promClient.collectDefaultMetrics;
 collectDefaultMetrics();
 
 const students = [];
+let studentsCache = null;
 let studentIdCounter = 1;
 
 
@@ -32,7 +33,11 @@ app.get('/metrics', async (req, res) => {
 
 app.get('/students', (req, res) => {
   logger.info('Fetching students');
-  res.json(students);
+  if (studentsCache) {
+    return res.set('Content-Type', 'application/json').send(studentsCache);
+  }
+  studentsCache = JSON.stringify(students);
+  res.set('Content-Type', 'application/json').send(studentsCache);
 });
 
 
@@ -46,6 +51,7 @@ app.post('/students', (req, res) => {
 
   student.id = studentIdCounter++;
   students.push(student);
+  studentsCache = null;
 
   logger.info(`Student created: ${JSON.stringify(student)}`);
   res.status(201).json(student);
