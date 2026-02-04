@@ -14,4 +14,10 @@ describe('Student API', () => {
             .send({ email: 'test@test.com' });
         expect(res.statusCode).toEqual(400);
     });
+
+    it('GET /students should return a list of students', async () => {
+        const res = await request(app).get('/students');
+        expect(res.statusCode).toEqual(200);
+        expect(Array.isArray(res.body)).toBeTruthy();
+    });
 });
